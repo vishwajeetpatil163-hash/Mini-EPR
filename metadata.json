@@ -1,0 +1,6 @@
+{
+  "name": "Wholesale ERP + CRM Operations Portal",
+  "description": "Wholesale ERP and CRM Operations Portal for Sales, Warehouse, Accounts, and Admin staff to manage customers, inventory, stock movements, and sales challans.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,103 @@
+{
+  "info": {
+    "name": "Wholesale ERP + CRM Operations Portal API",
+    "description": "Complete API postman collection covering Auth, Customers, Products, Stock Movements, and Sales Challans (including stock validation failure test cases).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth - Login (Admin)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@wholesale.com\",\n  \"password\": \"admin123\"\n}"
+        },
+        "url": { "raw": "http://localhost:3000/api/auth/login", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api", "auth", "login"] }
+      }
+    },
+    {
+      "name": "Auth - Me",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+        ],
+        "url": { "raw": "http://localhost:3000/api/auth/me", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api", "auth", "me"] }
+      }
+    },
+    {
+      "name": "Dashboard Stats",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+        ],
+        "url": { "raw": "http://localhost:3000/api/dashboard/stats", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api", "dashboard", "stats"] }
+      }
+    },
+    {
+      "name": "Get Customers",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+        ],
+        "url": { "raw": "http://localhost:3000/api/customers?page=1&limit=10", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api", "customers"] }
+      }
+    },
+    {
+      "name": "Get Products (Low Stock)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+        ],
+        "url": { "raw": "http://localhost:3000/api/products?lowStock=true", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api", "products"] }
+      }
+    },
+    {
+      "name": "Create Sales Challan (Draft)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customerId\": \"cust-5\",\n  \"deliveryAddress\": \"Warehouse 12, Enterprise Park\",\n  \"remarks\": \"Standard delivery\",\n  \"status\": \"DRAFT\",\n  \"items\": [\n    {\n      \"productId\": \"prod-1\",\n      \"quantity\": 50\n    }\n  ]\n}"
+        },
+        "url": { "raw": "http://localhost:3000/api/challans", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api", "challans"] }
+      }
+    },
+    {
+      "name": "Confirm Sales Challan (Success)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+        ],
+        "url": { "raw": "http://localhost:3000/api/challans/ch-1/confirm", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api", "challans", "ch-1", "confirm"] }
+      }
+    },
+    {
+      "name": "Create & Confirm Challan - Insufficient Stock (Returns 409 Conflict)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customerId\": \"cust-1\",\n  \"deliveryAddress\": \"Plot 42, Industrial Zone B\",\n  \"status\": \"CONFIRMED\",\n  \"items\": [\n    {\n      \"productId\": \"prod-2\",\n      \"quantity\": 9999\n    }\n  ]\n}"
+        },
+        "url": { "raw": "http://localhost:3000/api/challans", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api", "challans"] }
+      }
+    }
+  ]
+}
