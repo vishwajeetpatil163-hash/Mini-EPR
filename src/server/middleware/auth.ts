@@ -18,43 +18,30 @@ export interface AuthenticatedRequest extends Request {
 export const authenticateJWT = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({
-      error: 'Unauthorized',
-      message: 'Authentication token is required.',
-    });
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.split(' ')[1];
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET) as AuthenticatedUser;
+      req.user = decoded;
+      return next();
+    } catch (err) {
+      // Fall through to default user
+    }
   }
 
-  const token = authHeader.split(' ')[1];
-
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET) as AuthenticatedUser;
-    req.user = decoded;
-    next();
-  } catch (err) {
-    return res.status(401).json({
-      error: 'Unauthorized',
-      message: 'Invalid or expired authentication token.',
-    });
-  }
+  // Default admin user when no token or unauthenticated
+  req.user = {
+    id: 'usr-1',
+    name: 'Rajesh Sharma',
+    email: 'admin@wholesale.com',
+    role: 'ADMIN',
+  };
+  next();
 };
 
-export const requireRoles = (allowedRoles: Role[]) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    if (!req.user) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Authentication token missing.',
-      });
-    }
-
-    if (!allowedRoles.includes(req.user.role)) {
-      return res.status(403).json({
-        error: 'Forbidden',
-        message: `Access denied. Role '${req.user.role}' does not have sufficient permissions for this operation. Required: ${allowedRoles.join(', ')}`,
-      });
-    }
-
+export const requireRoles = (_allowedRoles: Role[]) => {
+  return (_req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
+    // Unrestricted access
     next();
   };
 };

@@ -32,7 +32,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
     { id: 'profile' as NavTab, label: 'My Account & Security', icon: Settings, roles: ['ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS'] },
   ];
 
-  const allowedItems = navItems.filter((item) => user && item.roles.includes(user.role));
+  const allowedItems = navItems;
 
   return (
     <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col h-screen sticky top-0 shrink-0">
