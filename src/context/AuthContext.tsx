@@ -15,31 +15,27 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const DEFAULT_USER: User = {
-  id: 'usr-1',
-  name: 'Rajesh Sharma (Admin)',
-  email: 'admin@wholesale.com',
-  role: 'ADMIN',
-};
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(DEFAULT_USER);
+  const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('wholesale_erp_token'));
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const initAuth = async () => {
       if (!token) {
-        setUser(DEFAULT_USER);
+        setUser(null);
         setLoading(false);
         return;
       }
+
       try {
         const data = await api.getMe();
         setUser(data.user);
       } catch (err) {
-        console.warn('Stored token invalid or backend not reachable, using default session:', err);
-        setUser(DEFAULT_USER);
+        console.warn('[AUTH SESSION] Stored token invalid or expired. Clearing session.');
+        localStorage.removeItem('wholesale_erp_token');
+        setToken(null);
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -49,15 +45,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [token]);
 
   const login = async (email: string, password: string) => {
-    try {
-      const data = await api.login(email, password);
-      localStorage.setItem('wholesale_erp_token', data.token);
-      setToken(data.token);
-      setUser(data.user);
-    } catch (err) {
-      // Fallback
-      setUser(DEFAULT_USER);
-    }
+    const data = await api.login(email, password);
+    localStorage.setItem('wholesale_erp_token', data.token);
+    setToken(data.token);
+    setUser(data.user);
   };
 
   const switchRoleDemo = async (role: Role) => {
@@ -77,7 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     localStorage.removeItem('wholesale_erp_token');
     setToken(null);
-    setUser(DEFAULT_USER);
+    setUser(null);
   };
 
   const updateSession = (updatedUser: User, newToken: string) => {
@@ -86,8 +77,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(updatedUser);
   };
 
-  const hasRole = (_roles: Role[]): boolean => {
-    return true; // All roles permitted without auth restriction
+  const hasRole = (roles: Role[]): boolean => {
+    if (!user) return false;
+    return roles.includes(user.role);
   };
 
   return (
@@ -115,3 +107,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

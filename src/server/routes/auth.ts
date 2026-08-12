@@ -58,14 +58,17 @@ router.post('/login', (req, res, next) => {
         role: user.role,
       },
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error('[AUTH ERROR] Unexpected error during login:', err);
-    next(err);
+    return res.status(500).json({
+      error: 'ServerError',
+      message: err?.message || 'An unexpected error occurred during login. Please try again.',
+    });
   }
 });
 
 // POST /api/auth/register (ADMIN only)
-router.post('/register', authenticateJWT, requireRoles(['ADMIN']), (req: AuthenticatedRequest, res: Response, next) => {
+router.post('/register', authenticateJWT, requireRoles(['ADMIN']), (req: AuthenticatedRequest, res: Response) => {
   try {
     const { name, email, password, role } = req.body;
 
@@ -103,8 +106,12 @@ router.post('/register', authenticateJWT, requireRoles(['ADMIN']), (req: Authent
         role: newUser.role,
       },
     });
-  } catch (err) {
-    next(err);
+  } catch (err: any) {
+    console.error('[AUTH ERROR] Registration failed:', err);
+    return res.status(500).json({
+      error: 'ServerError',
+      message: err?.message || 'Failed to register new staff account.',
+    });
   }
 });
 
@@ -233,8 +240,12 @@ router.put('/me', authenticateJWT, (req: AuthenticatedRequest, res: Response, ne
       },
       emailChanged,
     });
-  } catch (err) {
-    next(err);
+  } catch (err: any) {
+    console.error('[AUTH ERROR] Profile update failed:', err);
+    return res.status(500).json({
+      error: 'ServerError',
+      message: err?.message || 'Failed to update profile.',
+    });
   }
 });
 

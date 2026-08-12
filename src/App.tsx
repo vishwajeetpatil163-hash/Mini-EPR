@@ -29,6 +29,10 @@ const AppContent: React.FC = () => {
     );
   }
 
+  if (!user) {
+    return <LoginPage />;
+  }
+
   const handleCreateChallanForCustomer = (customerId: string) => {
     setPrefilledCustomerId(customerId);
     setActiveTab('create-challan');
