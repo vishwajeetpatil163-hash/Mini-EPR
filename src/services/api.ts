@@ -9,7 +9,16 @@ import {
   Role,
 } from '../types';
 
-const API_BASE = '/api';
+const getApiBase = (): string => {
+  const metaEnv = (import.meta as any).env?.VITE_API_URL;
+  if (metaEnv && typeof metaEnv === 'string' && metaEnv.trim().length > 0) {
+    const cleanUrl = metaEnv.trim().replace(/\/$/, '');
+    return cleanUrl.endsWith('/api') ? cleanUrl : `${cleanUrl}/api`;
+  }
+  return '/api';
+};
+
+const API_BASE = getApiBase();
 
 function getAuthToken(): string | null {
   return localStorage.getItem('wholesale_erp_token');
@@ -26,15 +35,39 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    ...options,
-    headers,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}${endpoint}`, {
+      ...options,
+      headers,
+    });
+  } catch (netErr: any) {
+    const targetHost = API_BASE.startsWith('http') ? API_BASE : window.location.origin + API_BASE;
+    throw new Error(
+      `Network Error: Failed to connect to API server at '${targetHost}'. Please check your CORS configuration or verify that the backend service is running.`
+    );
+  }
 
-  const data = await response.json().catch(() => ({}));
+  let data: any = {};
+  try {
+    data = await response.json();
+  } catch (jsonErr) {
+    if (!response.ok) {
+      throw new Error(
+        `Server Error (${response.status}): The backend returned a non-JSON response. Check backend URL ('${API_BASE}') and server logs.`
+      );
+    }
+  }
 
   if (!response.ok) {
-    const error: any = new Error(data.message || 'An API error occurred.');
+    const fallbackMessage =
+      response.status === 404
+        ? `API endpoint '${endpoint}' not found (404) at '${API_BASE}'. Verify your VITE_API_URL setting.`
+        : response.status === 500
+        ? 'Internal Server Error (500). Please check backend logs.'
+        : `Request failed with status ${response.status}.`;
+
+    const error: any = new Error(data.message || fallbackMessage);
     error.status = response.status;
     error.errorType = data.error || 'ApiError';
     error.shortageDetails = data.shortageDetails;

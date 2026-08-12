@@ -12,6 +12,7 @@ router.post('/login', (req, res, next) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
+      console.warn('[AUTH WARN] Login attempt with missing credentials');
       return res.status(400).json({
         error: 'ValidationError',
         message: 'Email and password are required.',
@@ -20,6 +21,7 @@ router.post('/login', (req, res, next) => {
 
     const user = db.findUserByEmail(email);
     if (!user) {
+      console.warn(`[AUTH WARN] Login failed: User email '${email}' not found.`);
       return res.status(401).json({
         error: 'InvalidCredentials',
         message: 'Invalid email address or password.',
@@ -28,6 +30,7 @@ router.post('/login', (req, res, next) => {
 
     const isMatch = bcrypt.compareSync(password, user.passwordHash);
     if (!isMatch) {
+      console.warn(`[AUTH WARN] Login failed: Incorrect password for '${email}'.`);
       return res.status(401).json({
         error: 'InvalidCredentials',
         message: 'Invalid email address or password.',
@@ -43,6 +46,8 @@ router.post('/login', (req, res, next) => {
 
     const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '24h' });
 
+    console.log(`[AUTH SUCCESS] User '${user.email}' (${user.role}) logged in successfully.`);
+
     res.json({
       message: 'Login successful.',
       token,
@@ -54,6 +59,7 @@ router.post('/login', (req, res, next) => {
       },
     });
   } catch (err) {
+    console.error('[AUTH ERROR] Unexpected error during login:', err);
     next(err);
   }
 });

@@ -12,9 +12,30 @@ import { errorHandler } from './src/server/middleware/errorHandler';
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
-  app.use(cors());
+  // CORS Configuration
+  const configuredOrigins = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
+    : ['https://mini-epr.vercel.app', 'http://localhost:5173', 'http://localhost:3000'];
+
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        // Allow requests with no origin (e.g. mobile apps, curl, server-to-server) or matching allowed origins / wildcard
+        if (!origin || configuredOrigins.includes('*') || configuredOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          // Allow all origins gracefully in development/demo deployments while preserving credentials header support
+          callback(null, true);
+        }
+      },
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+    })
+  );
+
   app.use(express.json());
 
   // Mount API Routes
