@@ -1,103 +1,1323 @@
 {
   "info": {
-    "name": "Wholesale ERP + CRM Operations Portal API",
-    "description": "Complete API postman collection covering Auth, Customers, Products, Stock Movements, and Sales Challans (including stock validation failure test cases).",
+    "_postman_id": "8968e1bf-a26e-488a-bc0b-9149bd13c435",
+    "name": "Wholesale ERP & CRM Operations API",
+    "description": "Complete Postman API Collection covering all REST API endpoints for the Wholesale ERP & CRM Operations Portal including Authentication, Customer Management (CRM), Products & Stock Audit Movements, Sales Delivery Challans, and Dashboard Analytics.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "Auth - Login (Admin)",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"admin@wholesale.com\",\n  \"password\": \"admin123\"\n}"
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "POST /auth/login - Success (Admin Login)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set('authToken', jsonData.token);",
+                  "    pm.environment.set('authToken', jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@wholesale.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Authenticates a user and returns a JWT Bearer token along with user profile information."
+          },
+          "response": [
+            {
+              "name": "200 OK - Successful Login",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"admin@wholesale.com\",\n  \"password\": \"admin123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Login successful.\",\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": \"usr-1\",\n    \"name\": \"Rajesh Sharma\",\n    \"email\": \"admin@wholesale.com\",\n    \"role\": \"ADMIN\"\n  }\n}"
+            }
+          ]
         },
-        "url": { "raw": "http://localhost:3000/api/auth/login", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api", "auth", "login"] }
-      }
-    },
-    {
-      "name": "Auth - Me",
-      "request": {
-        "method": "GET",
-        "header": [
-          { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
-        ],
-        "url": { "raw": "http://localhost:3000/api/auth/me", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api", "auth", "me"] }
-      }
-    },
-    {
-      "name": "Dashboard Stats",
-      "request": {
-        "method": "GET",
-        "header": [
-          { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
-        ],
-        "url": { "raw": "http://localhost:3000/api/dashboard/stats", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api", "dashboard", "stats"] }
-      }
-    },
-    {
-      "name": "Get Customers",
-      "request": {
-        "method": "GET",
-        "header": [
-          { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
-        ],
-        "url": { "raw": "http://localhost:3000/api/customers?page=1&limit=10", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api", "customers"] }
-      }
-    },
-    {
-      "name": "Get Products (Low Stock)",
-      "request": {
-        "method": "GET",
-        "header": [
-          { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
-        ],
-        "url": { "raw": "http://localhost:3000/api/products?lowStock=true", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api", "products"] }
-      }
-    },
-    {
-      "name": "Create Sales Challan (Draft)",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" },
-          { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"customerId\": \"cust-5\",\n  \"deliveryAddress\": \"Warehouse 12, Enterprise Park\",\n  \"remarks\": \"Standard delivery\",\n  \"status\": \"DRAFT\",\n  \"items\": [\n    {\n      \"productId\": \"prod-1\",\n      \"quantity\": 50\n    }\n  ]\n}"
+        {
+          "name": "POST /auth/login - Failure (Invalid Credentials)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@wholesale.com\",\n  \"password\": \"wrongpass\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Rejects login attempt with invalid password and returns 401 Unauthorized."
+          },
+          "response": [
+            {
+              "name": "401 Unauthorized - Invalid Credentials",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"admin@wholesale.com\",\n  \"password\": \"wrongpass\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"InvalidCredentials\",\n  \"message\": \"Invalid email address or password.\"\n}"
+            }
+          ]
         },
-        "url": { "raw": "http://localhost:3000/api/challans", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api", "challans"] }
-      }
-    },
-    {
-      "name": "Confirm Sales Challan (Success)",
-      "request": {
-        "method": "PATCH",
-        "header": [
-          { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
-        ],
-        "url": { "raw": "http://localhost:3000/api/challans/ch-1/confirm", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api", "challans", "ch-1", "confirm"] }
-      }
-    },
-    {
-      "name": "Create & Confirm Challan - Insufficient Stock (Returns 409 Conflict)",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" },
-          { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"customerId\": \"cust-1\",\n  \"deliveryAddress\": \"Plot 42, Industrial Zone B\",\n  \"status\": \"CONFIRMED\",\n  \"items\": [\n    {\n      \"productId\": \"prod-2\",\n      \"quantity\": 9999\n    }\n  ]\n}"
+        {
+          "name": "GET /auth/me - Success (Current Session)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Returns current logged in user details decoded from the JWT token."
+          },
+          "response": [
+            {
+              "name": "200 OK - Authenticated Session Info",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/me",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "me"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"user\": {\n    \"id\": \"usr-1\",\n    \"name\": \"Rajesh Sharma\",\n    \"email\": \"admin@wholesale.com\",\n    \"role\": \"ADMIN\"\n  }\n}"
+            }
+          ]
         },
-        "url": { "raw": "http://localhost:3000/api/challans", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api", "challans"] }
+        {
+          "name": "GET /auth/me - Failure (Missing Bearer Token)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Returns 401 Unauthorized when no Authorization header is provided."
+          },
+          "response": [
+            {
+              "name": "401 Unauthorized - Missing Token",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/me",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "me"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Unauthorized\",\n  \"message\": \"Authentication token is required in Authorization header (Format: Bearer <token>).\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /auth/register - Success (Register Staff)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Priya Verma\",\n  \"email\": \"priya.sales@wholesale.com\",\n  \"password\": \"sales123\",\n  \"role\": \"SALES\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Admin endpoint to register new staff user accounts with specific RBAC roles."
+          },
+          "response": [
+            {
+              "name": "201 Created - Staff Registered",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Priya Verma\",\n  \"email\": \"priya.sales@wholesale.com\",\n  \"password\": \"sales123\",\n  \"role\": \"SALES\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "register"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"User registered successfully.\",\n  \"user\": {\n    \"id\": \"usr-5\",\n    \"name\": \"Priya Verma\",\n    \"email\": \"priya.sales@wholesale.com\",\n    \"role\": \"SALES\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "PUT /auth/profile - Success (Update Profile)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Rajesh Sharma (Senior Manager)\",\n  \"email\": \"admin@wholesale.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "profile"]
+            },
+            "description": "Updates profile details for the currently logged in user."
+          },
+          "response": [
+            {
+              "name": "200 OK - Profile Updated",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Rajesh Sharma (Senior Manager)\",\n  \"email\": \"admin@wholesale.com\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/profile",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "profile"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Profile updated successfully.\",\n  \"user\": {\n    \"id\": \"usr-1\",\n    \"name\": \"Rajesh Sharma (Senior Manager)\",\n    \"email\": \"admin@wholesale.com\",\n    \"role\": \"ADMIN\"\n  },\n  \"emailChanged\": false\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Customers (CRM)",
+      "item": [
+        {
+          "name": "GET /customers - List Customers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customers?page=1&limit=10&status=ACTIVE&q=Apex",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "status", "value": "ACTIVE" },
+                { "key": "q", "value": "Apex" }
+              ]
+            },
+            "description": "Retrieves paginated list of customers with optional search and status filtering."
+          },
+          "response": [
+            {
+              "name": "200 OK - Paginated Customer Directory",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/customers?page=1&limit=10",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["customers"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"items\": [\n    {\n      \"id\": \"cust-1\",\n      \"name\": \"Vikram Mehta\",\n      \"mobile\": \"+91 98200 12345\",\n      \"email\": \"vikram@apextraders.com\",\n      \"businessName\": \"Apex Electronics & Traders\",\n      \"gstNumber\": \"27AAACA12341ZV\",\n      \"customerType\": \"WHOLESALE\",\n      \"address\": \"Gala 14, Industrial Estate, Andheri East, Mumbai, MH - 400069\",\n      \"status\": \"ACTIVE\",\n      \"followUpDate\": \"2026-08-15\",\n      \"notes\": \"Key wholesale buyer for LED panels.\",\n      \"createdAt\": \"2026-01-15T10:00:00.000Z\",\n      \"updatedAt\": \"2026-08-10T14:30:00.000Z\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /customers/:id - Get Customer Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customers/cust-1",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers", "cust-1"]
+            },
+            "description": "Gets single customer account profile details by ID."
+          },
+          "response": [
+            {
+              "name": "200 OK - Customer Record Found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/customers/cust-1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["customers", "cust-1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": \"cust-1\",\n  \"name\": \"Vikram Mehta\",\n  \"mobile\": \"+91 98200 12345\",\n  \"email\": \"vikram@apextraders.com\",\n  \"businessName\": \"Apex Electronics & Traders\",\n  \"gstNumber\": \"27AAACA12341ZV\",\n  \"customerType\": \"WHOLESALE\",\n  \"address\": \"Gala 14, Industrial Estate, Andheri East, Mumbai, MH - 400069\",\n  \"status\": \"ACTIVE\",\n  \"followUpDate\": \"2026-08-15\",\n  \"notes\": \"Key wholesale buyer.\",\n  \"createdAt\": \"2026-01-15T10:00:00.000Z\",\n  \"updatedAt\": \"2026-08-10T14:30:00.000Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /customers/:id - Failure (Not Found)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customers/invalid-cust-999",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers", "invalid-cust-999"]
+            },
+            "description": "Returns 404 Not Found when customer ID does not exist."
+          },
+          "response": [
+            {
+              "name": "404 Not Found - Missing Customer",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/customers/invalid-cust-999",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["customers", "invalid-cust-999"]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"NotFound\",\n  \"message\": \"Customer 'invalid-cust-999' not found.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /customers - Success (Create Customer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ramesh Patel\",\n  \"mobile\": \"+91 98765 43210\",\n  \"email\": \"ramesh@pateltraders.com\",\n  \"businessName\": \"Patel Electronics & Hardware\",\n  \"gstNumber\": \"27AAACP12341ZV\",\n  \"customerType\": \"WHOLESALE\",\n  \"address\": \"Shop 5, Sector 17, Vashi, Navi Mumbai - 400703\",\n  \"status\": \"ACTIVE\",\n  \"followUpDate\": \"2026-08-20\",\n  \"notes\": \"New distributor account for western region.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers"]
+            },
+            "description": "Creates a new wholesale customer record."
+          },
+          "response": [
+            {
+              "name": "201 Created - Customer Added",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Ramesh Patel\",\n  \"mobile\": \"+91 98765 43210\",\n  \"email\": \"ramesh@pateltraders.com\",\n  \"businessName\": \"Patel Electronics & Hardware\",\n  \"gstNumber\": \"27AAACP12341ZV\",\n  \"customerType\": \"WHOLESALE\",\n  \"address\": \"Shop 5, Sector 17, Vashi, Navi Mumbai - 400703\",\n  \"status\": \"ACTIVE\",\n  \"followUpDate\": \"2026-08-20\",\n  \"notes\": \"New distributor account for western region.\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/customers",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["customers"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Customer created successfully.\",\n  \"customer\": {\n    \"id\": \"cust-5\",\n    \"name\": \"Ramesh Patel\",\n    \"mobile\": \"+91 98765 43210\",\n    \"email\": \"ramesh@pateltraders.com\",\n    \"businessName\": \"Patel Electronics & Hardware\",\n    \"gstNumber\": \"27AAACP12341ZV\",\n    \"customerType\": \"WHOLESALE\",\n    \"address\": \"Shop 5, Sector 17, Vashi, Navi Mumbai - 400703\",\n    \"status\": \"ACTIVE\",\n    \"followUpDate\": \"2026-08-20\",\n    \"notes\": \"New distributor account for western region.\",\n    \"createdAt\": \"2026-08-12T03:15:00.000Z\",\n    \"updatedAt\": \"2026-08-12T03:15:00.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /customers - Failure (Missing Required Fields)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Incomplete Trader\",\n  \"mobile\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers"]
+            },
+            "description": "Returns 400 Bad Request when mandatory customer fields are missing."
+          },
+          "response": [
+            {
+              "name": "400 Bad Request - Validation Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Incomplete Trader\",\n  \"mobile\": \"\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/customers",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["customers"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"ValidationError\",\n  \"message\": \"Name, mobile, email, businessName, and address are required.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "PUT /customers/:id - Update Customer",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"notes\": \"Credit term extended to 30 days post evaluation.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/customers/cust-1",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers", "cust-1"]
+            },
+            "description": "Updates fields on an existing customer record."
+          },
+          "response": [
+            {
+              "name": "200 OK - Customer Updated",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"ACTIVE\",\n  \"notes\": \"Credit term extended to 30 days post evaluation.\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/customers/cust-1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["customers", "cust-1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Customer updated successfully.\",\n  \"customer\": {\n    \"id\": \"cust-1\",\n    \"name\": \"Vikram Mehta\",\n    \"mobile\": \"+91 98200 12345\",\n    \"email\": \"vikram@apextraders.com\",\n    \"businessName\": \"Apex Electronics & Traders\",\n    \"gstNumber\": \"27AAACA12341ZV\",\n    \"customerType\": \"WHOLESALE\",\n    \"address\": \"Gala 14, Industrial Estate, Andheri East, Mumbai, MH - 400069\",\n    \"status\": \"ACTIVE\",\n    \"followUpDate\": \"2026-08-15\",\n    \"notes\": \"Credit term extended to 30 days post evaluation.\",\n    \"createdAt\": \"2026-01-15T10:00:00.000Z\",\n    \"updatedAt\": \"2026-08-12T03:15:00.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "DELETE /customers/:id - Delete Customer",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customers/cust-5",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers", "cust-5"]
+            },
+            "description": "Deletes a customer account record."
+          },
+          "response": [
+            {
+              "name": "200 OK - Customer Deleted",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/customers/cust-5",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["customers", "cust-5"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Customer deleted successfully.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Products & Stock Movements",
+      "item": [
+        {
+          "name": "GET /products - List Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products?page=1&limit=10&lowStock=false&q=Smart",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "lowStock", "value": "false" },
+                { "key": "q", "value": "Smart" }
+              ]
+            },
+            "description": "Retrieves catalog products with stock levels, bin locations, and low stock filters."
+          },
+          "response": [
+            {
+              "name": "200 OK - Product Catalog List",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/products?page=1&limit=10",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"items\": [\n    {\n      \"id\": \"prod-1\",\n      \"sku\": \"EL-LED-55U\",\n      \"name\": \"Smart Ultra HD 55\\\" LED Display Panel\",\n      \"category\": \"Consumer Electronics\",\n      \"unitPrice\": 32500,\n      \"currentStock\": 42,\n      \"minStockAlert\": 10,\n      \"warehouseLocation\": \"Rack A-12 / Shelf 3\",\n      \"createdAt\": \"2026-01-10T08:00:00.000Z\",\n      \"updatedAt\": \"2026-08-11T16:00:00.000Z\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /products/:id - Get Product & Movement History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/prod-1",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "prod-1"]
+            },
+            "description": "Gets product catalog item along with its historical stock movement log."
+          },
+          "response": [
+            {
+              "name": "200 OK - Product Details & Movements",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/products/prod-1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products", "prod-1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": \"prod-1\",\n  \"sku\": \"EL-LED-55U\",\n  \"name\": \"Smart Ultra HD 55\\\" LED Display Panel\",\n  \"category\": \"Consumer Electronics\",\n  \"unitPrice\": 32500,\n  \"currentStock\": 42,\n  \"minStockAlert\": 10,\n  \"warehouseLocation\": \"Rack A-12 / Shelf 3\",\n  \"createdAt\": \"2026-01-10T08:00:00.000Z\",\n  \"updatedAt\": \"2026-08-11T16:00:00.000Z\",\n  \"movements\": [\n    {\n      \"id\": \"sm-101\",\n      \"productId\": \"prod-1\",\n      \"quantityChanged\": 20,\n      \"movementType\": \"IN\",\n      \"reason\": \"Inbound shipment PO-8821\",\n      \"createdBy\": \"Ramesh Warehouse\",\n      \"createdAt\": \"2026-08-01T11:00:00.000Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /products - Success (Create Product)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"AUDIO-BT-09\",\n  \"name\": \"Pro Wireless Noise Cancelling Headphones\",\n  \"category\": \"Audio Equipment\",\n  \"unitPrice\": 4500,\n  \"currentStock\": 50,\n  \"minStockAlert\": 15,\n  \"warehouseLocation\": \"Rack C-02 / Shelf 1\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"]
+            },
+            "description": "Creates a new catalog product item."
+          },
+          "response": [
+            {
+              "name": "201 Created - Product Added",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sku\": \"AUDIO-BT-09\",\n  \"name\": \"Pro Wireless Noise Cancelling Headphones\",\n  \"category\": \"Audio Equipment\",\n  \"unitPrice\": 4500,\n  \"currentStock\": 50,\n  \"minStockAlert\": 15,\n  \"warehouseLocation\": \"Rack C-02 / Shelf 1\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/products",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Product created successfully.\",\n  \"product\": {\n    \"id\": \"prod-6\",\n    \"sku\": \"AUDIO-BT-09\",\n    \"name\": \"Pro Wireless Noise Cancelling Headphones\",\n    \"category\": \"Audio Equipment\",\n    \"unitPrice\": 4500,\n    \"currentStock\": 50,\n    \"minStockAlert\": 15,\n    \"warehouseLocation\": \"Rack C-02 / Shelf 1\",\n    \"createdAt\": \"2026-08-12T03:15:00.000Z\",\n    \"updatedAt\": \"2026-08-12T03:15:00.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /products - Failure (Missing Required Fields)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Unnamed Gadget\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"]
+            },
+            "description": "Returns 400 Bad Request when SKU, category, or warehouse location is missing."
+          },
+          "response": [
+            {
+              "name": "400 Bad Request - Validation Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Unnamed Gadget\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/products",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"ValidationError\",\n  \"message\": \"Name, SKU, category, unitPrice, and warehouseLocation are required.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /products/:id/stock-movements - Log Stock Adjustment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantityChanged\": 15,\n  \"movementType\": \"IN\",\n  \"reason\": \"Received fresh batch from supplier invoice #SUP-9912\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/prod-1/stock-movements",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "prod-1", "stock-movements"]
+            },
+            "description": "Logs manual stock movement (IN or OUT) and updates real-time inventory count."
+          },
+          "response": [
+            {
+              "name": "201 Created - Stock Adjusted",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"quantityChanged\": 15,\n  \"movementType\": \"IN\",\n  \"reason\": \"Received fresh batch from supplier invoice #SUP-9912\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/products/prod-1/stock-movements",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products", "prod-1", "stock-movements"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Stock movement recorded successfully.\",\n  \"stockMovement\": {\n    \"id\": \"sm-105\",\n    \"productId\": \"prod-1\",\n    \"quantityChanged\": 15,\n    \"movementType\": \"IN\",\n    \"reason\": \"Received fresh batch from supplier invoice #SUP-9912\",\n    \"createdBy\": \"Rajesh Sharma\",\n    \"createdAt\": \"2026-08-12T03:15:00.000Z\"\n  },\n  \"currentStock\": 57\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /products/stock-movements/all - Global Stock Audit Ledger",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/stock-movements/all?page=1&limit=15",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "stock-movements", "all"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "15" }
+              ]
+            },
+            "description": "Returns full system audit trail of all inventory IN/OUT changes across products."
+          },
+          "response": [
+            {
+              "name": "200 OK - Global Audit Movements",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/products/stock-movements/all?page=1&limit=15",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products", "stock-movements", "all"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"items\": [\n    {\n      \"id\": \"sm-105\",\n      \"productId\": \"prod-1\",\n      \"quantityChanged\": 15,\n      \"movementType\": \"IN\",\n      \"reason\": \"Received fresh batch from supplier invoice #SUP-9912\",\n      \"createdBy\": \"Rajesh Sharma\",\n      \"createdAt\": \"2026-08-12T03:15:00.000Z\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Sales Delivery Challans",
+      "item": [
+        {
+          "name": "GET /challans - List Sales Challans",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/challans?page=1&limit=10&status=DRAFT",
+              "host": ["{{baseUrl}}"],
+              "path": ["challans"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "status", "value": "DRAFT" }
+              ]
+            },
+            "description": "Gets paginated list of sales delivery challans with customer details and line items."
+          },
+          "response": [
+            {
+              "name": "200 OK - Challans List",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/challans?page=1&limit=10",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["challans"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"items\": [\n    {\n      \"id\": \"ch-101\",\n      \"challanNumber\": \"CH-2026-0001\",\n      \"customerId\": \"cust-1\",\n      \"customerName\": \"Apex Electronics & Traders\",\n      \"deliveryAddress\": \"Gala 14, Industrial Estate, Andheri East, Mumbai\",\n      \"remarks\": \"Express delivery required\",\n      \"status\": \"DRAFT\",\n      \"totalAmount\": 65000,\n      \"createdBy\": \"Sales Rep\",\n      \"createdAt\": \"2026-08-11T12:00:00.000Z\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /challans - Success (Create Sales Challan)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"cust-1\",\n  \"deliveryAddress\": \"Gala 14, Industrial Estate, Andheri East, Mumbai\",\n  \"remarks\": \"Dispatch with tax invoice copy\",\n  \"status\": \"DRAFT\",\n  \"items\": [\n    {\n      \"productId\": \"prod-1\",\n      \"quantity\": 2,\n      \"unitPrice\": 32500\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/challans",
+              "host": ["{{baseUrl}}"],
+              "path": ["challans"]
+            },
+            "description": "Creates a new Sales Delivery Challan in DRAFT status."
+          },
+          "response": [
+            {
+              "name": "201 Created - Sales Challan Draft Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"customerId\": \"cust-1\",\n  \"deliveryAddress\": \"Gala 14, Industrial Estate, Andheri East, Mumbai\",\n  \"remarks\": \"Dispatch with tax invoice copy\",\n  \"status\": \"DRAFT\",\n  \"items\": [\n    {\n      \"productId\": \"prod-1\",\n      \"quantity\": 2,\n      \"unitPrice\": 32500\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/challans",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["challans"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Sales Challan CH-2026-0002 created successfully as DRAFT.\",\n  \"challan\": {\n    \"id\": \"ch-102\",\n    \"challanNumber\": \"CH-2026-0002\",\n    \"customerId\": \"cust-1\",\n    \"customerName\": \"Apex Electronics & Traders\",\n    \"deliveryAddress\": \"Gala 14, Industrial Estate, Andheri East, Mumbai\",\n    \"remarks\": \"Dispatch with tax invoice copy\",\n    \"status\": \"DRAFT\",\n    \"totalAmount\": 65000,\n    \"createdBy\": \"Rajesh Sharma\",\n    \"createdAt\": \"2026-08-12T03:15:00.000Z\",\n    \"items\": [\n      {\n        \"id\": \"item-201\",\n        \"challanId\": \"ch-102\",\n        \"productId\": \"prod-1\",\n        \"productName\": \"Smart Ultra HD 55\\\" LED Display Panel\",\n        \"sku\": \"EL-LED-55U\",\n        \"quantity\": 2,\n        \"unitPrice\": 32500,\n        \"totalPrice\": 65000\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /challans - Failure (Empty Items)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"cust-1\",\n  \"items\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/challans",
+              "host": ["{{baseUrl}}"],
+              "path": ["challans"]
+            },
+            "description": "Returns 400 Bad Request when attempting to create a challan with no line items."
+          },
+          "response": [
+            {
+              "name": "400 Bad Request - Missing Items",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"customerId\": \"cust-1\",\n  \"items\": []\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/challans",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["challans"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"ValidationError\",\n  \"message\": \"customerId and non-empty items array are required.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "PATCH /challans/:id/confirm - Success (Confirm & Deduct Stock)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/challans/ch-102/confirm",
+              "host": ["{{baseUrl}}"],
+              "path": ["challans", "ch-102", "confirm"]
+            },
+            "description": "Confirms sales delivery challan, validates stock availability, and deducts items from product inventory."
+          },
+          "response": [
+            {
+              "name": "200 OK - Challan Confirmed & Stock Deducted",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/challans/ch-102/confirm",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["challans", "ch-102", "confirm"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Sales Challan CH-2026-0002 confirmed and stock updated.\",\n  \"challan\": {\n    \"id\": \"ch-102\",\n    \"challanNumber\": \"CH-2026-0002\",\n    \"status\": \"CONFIRMED\",\n    \"totalAmount\": 65000\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "PATCH /challans/:id/confirm - Failure (Insufficient Stock)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/challans/ch-exceed-stock/confirm",
+              "host": ["{{baseUrl}}"],
+              "path": ["challans", "ch-exceed-stock", "confirm"]
+            },
+            "description": "Returns 409 Conflict when item quantity exceeds available warehouse inventory stock."
+          },
+          "response": [
+            {
+              "name": "409 Conflict - Stock Shortage Validation Error",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/challans/ch-exceed-stock/confirm",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["challans", "ch-exceed-stock", "confirm"]
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Conflict\",\n  \"message\": \"Insufficient stock for items: 'Smart Ultra HD 55\\\" LED Display Panel' (EL-LED-55U): requested 500, available 42\",\n  \"shortageDetails\": [\n    {\n      \"productId\": \"prod-1\",\n      \"name\": \"Smart Ultra HD 55\\\" LED Display Panel\",\n      \"sku\": \"EL-LED-55U\",\n      \"requested\": 500,\n      \"available\": 42\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "PATCH /challans/:id/cancel - Success (Cancel Challan)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/challans/ch-102/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["challans", "ch-102", "cancel"]
+            },
+            "description": "Cancels sales delivery challan and reverses stock deduction if previously confirmed."
+          },
+          "response": [
+            {
+              "name": "200 OK - Challan Cancelled",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/challans/ch-102/cancel",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["challans", "ch-102", "cancel"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Sales Challan CH-2026-0002 cancelled successfully.\",\n  \"challan\": {\n    \"id\": \"ch-102\",\n    \"challanNumber\": \"CH-2026-0002\",\n    \"status\": \"CANCELLED\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. Dashboard Analytics",
+      "item": [
+        {
+          "name": "GET /dashboard/stats - High Level Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "stats"]
+            },
+            "description": "Retrieves high-level KPI dashboard overview metrics, low stock warnings, pending challan count, and today's sales turnover."
+          },
+          "response": [
+            {
+              "name": "200 OK - KPI Summary Analytics",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/dashboard/stats",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["dashboard", "stats"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"totalCustomers\": 4,\n  \"totalCustomersChange\": \"+12%\",\n  \"lowStockAlerts\": 2,\n  \"lowStockMessage\": \"Requires action\",\n  \"draftChallans\": 1,\n  \"draftChallansMessage\": \"Pending review\",\n  \"todaySales\": \"₹1.2 Lakh\",\n  \"todaySalesValue\": 120000,\n  \"todaySalesChange\": \"+5.4%\",\n  \"recentActivity\": [\n    {\n      \"id\": \"CH-2026-0001\",\n      \"customer\": \"Apex Electronics & Traders\",\n      \"type\": \"Challan\",\n      \"status\": \"Draft\",\n      \"amount\": \"₹65,000.00\",\n      \"date\": \"2026-08-11T12:00:00.000Z\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
       }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
     }
   ]
 }

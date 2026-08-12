@@ -172,4 +172,5 @@ Watch a complete walkthrough of the Wholesale ERP & CRM Operations Portal demons
 
 A complete Postman Collection is provided in the repository (`postman_collection.json`) containing pre-configured requests for Authentication, Customer CRM, Products & Stock Audit, and Sales Challan confirmation/cancellation workflows.
 
-- **Postman Workspace / Collection Link**: `[POSTMAN_LINK]`
+- **Postman Collection File**: [`./postman_collection.json`](./postman_collection.json)
+- **Postman Workspace / Import Link**: `[POSTMAN_LINK]`
