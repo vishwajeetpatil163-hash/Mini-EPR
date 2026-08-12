@@ -684,6 +684,15 @@ class MemoryDatabase {
     return user;
   }
 
+  updateUser(id: string, updates: Partial<{ name: string; email: string; passwordHash: string }>): User | undefined {
+    const user = this.findUserById(id);
+    if (!user) return undefined;
+    if (updates.name !== undefined) user.name = updates.name;
+    if (updates.email !== undefined) user.email = updates.email.toLowerCase();
+    if (updates.passwordHash !== undefined) user.passwordHash = updates.passwordHash;
+    return user;
+  }
+
   // --- Customers ---
   getCustomers(params: { page?: number; limit?: number; q?: string; status?: string; type?: string }) {
     let list = [...this.customers];

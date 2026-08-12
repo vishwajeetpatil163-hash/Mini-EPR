@@ -10,6 +10,7 @@ import { StockTrailPage } from './pages/StockTrailPage';
 import { ChallansPage } from './pages/ChallansPage';
 import { CreateChallanPage } from './pages/CreateChallanPage';
 import { StaffPage } from './pages/StaffPage';
+import { ProfilePage } from './pages/ProfilePage';
 
 const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
@@ -52,7 +53,11 @@ const AppContent: React.FC = () => {
 
       {/* Main Right Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        <Header searchTerm={globalSearch} onSearchChange={setGlobalSearch} />
+        <Header
+          searchTerm={globalSearch}
+          onSearchChange={setGlobalSearch}
+          onOpenProfile={() => setActiveTab('profile')}
+        />
 
         <main className="flex-1 p-6 overflow-y-auto">
           {activeTab === 'dashboard' && (
@@ -80,6 +85,8 @@ const AppContent: React.FC = () => {
           )}
 
           {activeTab === 'staff' && <StaffPage />}
+
+          {activeTab === 'profile' && <ProfilePage />}
         </main>
       </div>
     </div>

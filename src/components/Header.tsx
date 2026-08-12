@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { Search, Bell, Shield, ChevronDown, LogOut, User as UserIcon } from 'lucide-react';
+import { Search, Bell, Shield, ChevronDown, LogOut, User as UserIcon, Settings } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Role } from '../types';
 
 interface HeaderProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
+  onOpenProfile?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ searchTerm, onSearchChange }) => {
+export const Header: React.FC<HeaderProps> = ({ searchTerm, onSearchChange, onOpenProfile }) => {
   const { user, logout, switchRoleDemo } = useAuth();
   const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -151,10 +152,22 @@ export const Header: React.FC<HeaderProps> = ({ searchTerm, onSearchChange }) =>
                 <p className="text-[11px] text-gray-500">{user?.email}</p>
               </div>
               <div className="py-1">
-                <div className="px-4 py-1 text-[11px] text-gray-500 flex items-center space-x-2">
+                <div className="px-4 py-1.5 text-[11px] text-gray-500 flex items-center space-x-2">
                   <UserIcon className="h-3.5 w-3.5" />
                   <span>Role: {user?.role}</span>
                 </div>
+                {onOpenProfile && (
+                  <button
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      onOpenProfile();
+                    }}
+                    className="w-full text-left px-4 py-2 text-xs font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700 flex items-center space-x-2 transition-colors"
+                  >
+                    <Settings className="h-3.5 w-3.5 text-blue-600" />
+                    <span>My Profile / Settings</span>
+                  </button>
+                )}
               </div>
               <div className="border-t border-gray-100 pt-1">
                 <button

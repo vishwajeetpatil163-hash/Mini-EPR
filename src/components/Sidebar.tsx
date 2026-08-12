@@ -8,10 +8,11 @@ import {
   UserPlus,
   Boxes,
   Building2,
+  Settings,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-export type NavTab = 'dashboard' | 'customers' | 'products' | 'stock-trail' | 'challans' | 'staff';
+export type NavTab = 'dashboard' | 'customers' | 'products' | 'stock-trail' | 'challans' | 'staff' | 'profile';
 
 interface SidebarProps {
   activeTab: NavTab;
@@ -28,6 +29,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
     { id: 'stock-trail' as NavTab, label: 'Stock Audit Trail', icon: History, roles: ['ADMIN', 'WAREHOUSE', 'ACCOUNTS'] },
     { id: 'challans' as NavTab, label: 'Sales Challans', icon: FileSpreadsheet, roles: ['ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS'] },
     { id: 'staff' as NavTab, label: 'Staff & Roles', icon: UserPlus, roles: ['ADMIN'] },
+    { id: 'profile' as NavTab, label: 'My Account & Security', icon: Settings, roles: ['ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS'] },
   ];
 
   const allowedItems = navItems.filter((item) => user && item.roles.includes(user.role));

@@ -54,6 +54,23 @@ export const api = {
 
   getMe: () => request<{ user: User }>('/auth/me'),
 
+  updateProfile: (data: {
+    name?: string;
+    email?: string;
+    currentPassword: string;
+    newPassword?: string;
+    confirmPassword?: string;
+  }) =>
+    request<{
+      message: string;
+      token: string;
+      user: User;
+      emailChanged: boolean;
+    }>('/auth/me', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
   registerStaff: (data: { name: string; email: string; password: string; role: Role }) =>
     request<{ message: string; user: User }>('/auth/register', {
       method: 'POST',

@@ -10,6 +10,7 @@ interface AuthContextType {
   switchRoleDemo: (role: Role) => Promise<void>;
   logout: () => void;
   hasRole: (roles: Role[]) => boolean;
+  updateSession: (updatedUser: User, newToken: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -68,6 +69,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
+  const updateSession = (updatedUser: User, newToken: string) => {
+    localStorage.setItem('wholesale_erp_token', newToken);
+    setToken(newToken);
+    setUser(updatedUser);
+  };
+
   const hasRole = (roles: Role[]): boolean => {
     if (!user) return false;
     return roles.includes(user.role);
@@ -83,6 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         switchRoleDemo,
         logout,
         hasRole,
+        updateSession,
       }}
     >
       {children}
