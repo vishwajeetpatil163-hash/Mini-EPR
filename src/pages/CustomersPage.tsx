@@ -48,6 +48,9 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onCreateChallanFor
   // Modal forms
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [savingCustomer, setSavingCustomer] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [successToast, setSuccessToast] = useState<string | null>(null);
 
   // Form fields
   const [formData, setFormData] = useState({
@@ -121,21 +124,44 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onCreateChallanFor
 
   const handleSaveCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSavingCustomer(true);
+    setFormError(null);
+
+    // Basic frontend validation
+    if (!formData.name.trim() || !formData.mobile.trim() || !formData.email.trim() || !formData.businessName.trim() || !formData.address.trim()) {
+      setFormError('Please fill in all required fields (Name, Mobile, Email, Business Name, Address).');
+      setSavingCustomer(false);
+      return;
+    }
+
     try {
+      let savedCust: Customer;
       if (editingCustomer) {
-        const updated = await api.updateCustomer(editingCustomer.id, formData);
-        if (selectedCustomer?.id === editingCustomer.id && updated) {
-          setSelectedCustomer(updated);
-        }
+        const res = await api.updateCustomer(editingCustomer.id, formData);
+        savedCust = res.customer;
+        setSuccessToast(`Customer "${savedCust.name || formData.name}" updated successfully.`);
       } else {
-        await api.createCustomer(formData);
+        const res = await api.createCustomer(formData);
+        savedCust = res.customer;
+        setSuccessToast(`Customer "${savedCust.name || formData.name}" created successfully.`);
       }
+
       setShowAddModal(false);
       setEditingCustomer(null);
       resetForm();
-      fetchCustomers();
+      
+      // Refresh list and select the created/updated customer
+      await fetchCustomers();
+      if (savedCust && savedCust.id) {
+        handleSelectCustomer(savedCust);
+      }
+
+      setTimeout(() => setSuccessToast(null), 4000);
     } catch (err: any) {
-      alert(err.message || 'Failed to save customer.');
+      console.error('Customer save error:', err);
+      setFormError(err.message || 'Failed to save customer record. Please verify input fields.');
+    } finally {
+      setSavingCustomer(false);
     }
   };
 
@@ -145,12 +171,15 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onCreateChallanFor
       await api.deleteCustomer(id);
       if (selectedCustomer?.id === id) setSelectedCustomer(null);
       fetchCustomers();
+      setSuccessToast('Customer deleted successfully.');
+      setTimeout(() => setSuccessToast(null), 4000);
     } catch (err: any) {
       alert(err.message || 'Failed to delete customer.');
     }
   };
 
   const openEditModal = (cust: Customer) => {
+    setFormError(null);
     setEditingCustomer(cust);
     setFormData({
       name: cust.name,
@@ -168,6 +197,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onCreateChallanFor
   };
 
   const resetForm = () => {
+    setFormError(null);
     setFormData({
       name: '',
       mobile: '',
@@ -184,6 +214,16 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onCreateChallanFor
 
   return (
     <div className="space-y-6">
+      {/* Success Toast Banner */}
+      {successToast && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl text-xs font-semibold flex items-center justify-between shadow-sm animate-fade-in">
+          <span>{successToast}</span>
+          <button onClick={() => setSuccessToast(null)} className="text-emerald-600 hover:text-emerald-800">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       {/* Header Toolbar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
         <div>
@@ -196,7 +236,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onCreateChallanFor
           </p>
         </div>
 
-        {hasRole(['ADMIN', 'SALES']) && (
+        {hasRole(['ADMIN', 'SALES', 'ACCOUNTS', 'WAREHOUSE']) && (
           <button
             onClick={() => {
               resetForm();
@@ -519,6 +559,12 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onCreateChallanFor
             </h3>
 
             <form onSubmit={handleSaveCustomer} className="space-y-4 text-xs">
+              {formError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-xs font-medium">
+                  {formError}
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block font-semibold text-gray-700 mb-1">Contact Name *</label>
@@ -527,6 +573,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onCreateChallanFor
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g. Ramesh Patel"
                     className="w-full px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -537,6 +584,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onCreateChallanFor
                     required
                     value={formData.businessName}
                     onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+                    placeholder="e.g. Patel Electronics & Hardware"
                     className="w-full px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -550,6 +598,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onCreateChallanFor
                     required
                     value={formData.mobile}
                     onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+                    placeholder="e.g. +91 98765 43210"
                     className="w-full px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -560,6 +609,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onCreateChallanFor
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="e.g. owner@pateltraders.com"
                     className="w-full px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -567,11 +617,12 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onCreateChallanFor
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">GST Number</label>
+                  <label className="block font-semibold text-gray-700 mb-1">GST Number (Optional)</label>
                   <input
                     type="text"
                     value={formData.gstNumber}
                     onChange={(e) => setFormData({ ...formData, gstNumber: e.target.value })}
+                    placeholder="27AAACP12341ZV"
                     className="w-full px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -602,12 +653,34 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onCreateChallanFor
               </div>
 
               <div>
+                <label className="block font-semibold text-gray-700 mb-1">Next Follow-Up Date (Optional)</label>
+                <input
+                  type="date"
+                  value={formData.followUpDate}
+                  onChange={(e) => setFormData({ ...formData, followUpDate: e.target.value })}
+                  className="w-full px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
                 <label className="block font-semibold text-gray-700 mb-1">Delivery Address *</label>
                 <textarea
                   required
                   rows={2}
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  placeholder="Street, City, State, Pincode"
+                  className="w-full px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+                ></textarea>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Initial Notes / CRM History (Optional)</label>
+                <textarea
+                  rows={2}
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  placeholder="Special instructions, credit terms, or account lead details..."
                   className="w-full px-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
                 ></textarea>
               </div>
@@ -622,9 +695,11 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({ onCreateChallanFor
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow-sm"
+                  disabled={savingCustomer}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow-sm disabled:opacity-50 flex items-center space-x-1.5"
                 >
-                  {editingCustomer ? 'Save Changes' : 'Create Customer'}
+                  {savingCustomer && <div className="h-3 w-3 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                  <span>{editingCustomer ? 'Save Changes' : 'Create Customer Account'}</span>
                 </button>
               </div>
             </form>

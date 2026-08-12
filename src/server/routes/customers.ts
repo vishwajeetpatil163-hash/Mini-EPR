@@ -38,7 +38,7 @@ router.get('/:id', (req, res, next) => {
 });
 
 // POST /api/customers
-router.post('/', requireRoles(['ADMIN', 'SALES']), (req: AuthenticatedRequest, res: Response, next) => {
+router.post('/', requireRoles(['ADMIN', 'SALES', 'ACCOUNTS', 'WAREHOUSE']), (req: AuthenticatedRequest, res: Response, next) => {
   try {
     const { name, mobile, email, businessName, gstNumber, customerType, address, status, followUpDate, notes } = req.body;
 
@@ -50,16 +50,16 @@ router.post('/', requireRoles(['ADMIN', 'SALES']), (req: AuthenticatedRequest, r
     }
 
     const newCustomer = db.createCustomer({
-      name,
-      mobile,
-      email,
-      businessName,
-      gstNumber: gstNumber || '',
+      name: name.trim(),
+      mobile: mobile.trim(),
+      email: email.trim(),
+      businessName: businessName.trim(),
+      gstNumber: gstNumber ? gstNumber.trim() : '',
       customerType: (customerType as CustomerType) || 'WHOLESALE',
-      address,
+      address: address.trim(),
       status: (status as CustomerStatus) || 'ACTIVE',
-      followUpDate,
-      notes,
+      followUpDate: followUpDate || '',
+      notes: notes || '',
     });
 
     res.status(201).json({
@@ -72,7 +72,7 @@ router.post('/', requireRoles(['ADMIN', 'SALES']), (req: AuthenticatedRequest, r
 });
 
 // PUT /api/customers/:id
-router.put('/:id', requireRoles(['ADMIN', 'SALES']), (req: AuthenticatedRequest, res: Response, next) => {
+router.put('/:id', requireRoles(['ADMIN', 'SALES', 'ACCOUNTS', 'WAREHOUSE']), (req: AuthenticatedRequest, res: Response, next) => {
   try {
     const updated = db.updateCustomer(req.params.id, req.body);
     if (!updated) {

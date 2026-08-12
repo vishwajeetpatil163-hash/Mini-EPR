@@ -65,6 +65,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         </div>
         <div className="flex items-center space-x-3 shrink-0">
           <button
+            onClick={() => onNavigate('customers')}
+            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-xs font-semibold shadow-md transition-all flex items-center space-x-1.5"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Add Customer</span>
+          </button>
+          <button
             onClick={() => onNavigate('challans')}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-md transition-all flex items-center space-x-1.5"
           >
